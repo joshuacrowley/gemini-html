@@ -15,7 +15,7 @@ A collection of interactive HTML demos showcasing the capabilities of Google's G
 ### 1. Text Generation (`01-text-generation.html`)
 📝 **Recipe Writing Assistant**  
 Generate creative and sophisticated recipes with AI. Create gourmet "Invisible Soup" recipes with adjustable creativity levels.
-- Temperature control
+- Prompt-based creativity steering
 - System instructions
 - Creative writing
 
@@ -26,7 +26,7 @@ Transform an empty plate into a beautifully plated dish with AI. See before and 
 - Before/after comparisons
 - Professional plating
 
-> **Note:** This demo uses Imagen (Nanobananas) and requires a **paid API token** to function.
+> **Note:** This demo uses Nano Banana 2 (`gemini-3.1-flash-image`) and requires a **paid API token** to function.
 
 ### 3. Speech Generation (`03-speech-generation.html`)
 🔊 **Cooking Show Narrator**  
@@ -52,6 +52,7 @@ Convert menu descriptions into structured JSON data. Transform text into organiz
 ### 6. Thinking Mode (`06-thinking.html`)
 🧠 **Kitchen Problem Solver**  
 Solve complex cooking puzzles with step-by-step reasoning. Watch AI think through cake baking optimization problems.
+- Adjustable thinking levels (minimal/low/medium/high)
 - Step-by-step reasoning
 - Math problems
 - Logical deduction
@@ -136,7 +137,7 @@ Each demo will prompt you to enter your Google AI API key on first use. The key 
 
 ## ⚠️ Important Notes
 
-- **Demo #2 (Image Generation)** requires a **paid API token** as it uses the Imagen API (Nanobananas)
+- **Demo #2 (Image Generation)** requires a **paid API token** as it uses Nano Banana 2 (`gemini-3.1-flash-image`)
 - All other demos work with the free API tier
 - API keys are stored in your browser's localStorage
 - No server or build process is required
@@ -145,9 +146,18 @@ Each demo will prompt you to enter your Google AI API key on first use. The key 
 ## 🛠️ Technical Details
 
 - Pure HTML/CSS/JavaScript - no frameworks required
-- Uses the `@google/generative-ai` SDK via CDN
+- Uses the `@google/genai` SDK via CDN (esm.sh)
 - Responsive design works on desktop and mobile
 - All demos include error handling and loading states
+
+### Models Used
+
+| Demo | Model |
+|------|-------|
+| Text, documents, images, video, audio, tools (1, 5, 7–14) | `gemini-3.5-flash` |
+| Image generation (2) | `gemini-3.1-flash-image` (Nano Banana 2) |
+| Speech generation (3) | `gemini-3.1-flash-tts-preview` |
+| Long context & thinking (4, 6) | `gemini-3.1-pro-preview`, `gemini-3.5-flash`, or `gemini-3.1-flash-lite` (selectable) |
 
 ## 📖 Resources
 

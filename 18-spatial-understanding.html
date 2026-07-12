@@ -203,7 +203,7 @@
     <div class="container">
         <div class="header">
             <h1>📦 Pantry Shelf Scanner</h1>
-            <p>Detect and locate every ingredient with bounding boxes</p>
+            <p>Gemini finds every ingredient in your photo and draws a box around it</p>
         </div>
 
         <div class="api-key-section">
@@ -230,10 +230,10 @@
             <div class="detections" id="detections"></div>
 
             <div class="output-note">
-                💡 The model returns each item's <code>box_2d</code> as
-                <code>[ymin, xmin, ymax, xmax]</code> normalized to 0–1000, which this page
-                scales to the image size and draws on a canvas overlay. Click a tag to
-                highlight its box.
+                💡 <strong>How it works:</strong> Gemini doesn't just name what's in the photo —
+                it also reports <em>where</em> each item is, as coordinates. This page uses those
+                coordinates to draw the boxes. Hover or click a colored tag below to highlight
+                that item in the photo.
             </div>
         </div>
     </div>

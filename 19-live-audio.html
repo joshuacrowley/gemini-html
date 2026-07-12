@@ -244,7 +244,7 @@
                 <button id="saveApiKey">Save Key</button>
             </div>
             <div class="api-status" id="apiStatus">Enter your Google AI API key to start a voice session</div>
-            <div class="security-note">🔒 This demo connects straight from the browser with your API key for simplicity. In production apps, mint short-lived <strong>ephemeral tokens</strong> on a server instead of shipping the key to the client.</div>
+            <div class="security-note">🔒 Your API key stays in your browser and goes only to Google. (For developers: a real app for other people should use short-lived <strong>ephemeral tokens</strong> from a server rather than putting an API key in the webpage.)</div>
         </div>
 
         <div class="content-section">
@@ -263,8 +263,8 @@
             <div class="tips">
                 💡 <strong>Try asking:</strong> "How do I know when my steak is medium-rare?" ·
                 "Walk me through folding egg whites" · "My sauce broke, help!"<br>
-                🎧 Use headphones to stop the coach from hearing (and interrupting) itself.
-                You can interrupt the coach at any time by speaking — that's voice activity detection.
+                🎧 Wear headphones so the coach doesn't hear itself talking.
+                And you can interrupt at any time — just start speaking and it will stop and listen.
             </div>
         </div>
     </div>
@@ -349,7 +349,7 @@
                 return;
             }
 
-            sessionStatus.textContent = '🔌 Connecting to the Live API...';
+            sessionStatus.textContent = '🔌 Connecting to Gemini...';
             transcript.innerHTML = '';
             currentUserLine = null;
             currentCoachLine = null;
@@ -379,7 +379,7 @@
                         onmessage: handleServerMessage,
                         onerror: (e) => {
                             console.error('Live session error:', e);
-                            sessionStatus.textContent = '❌ Session error — see console for details';
+                            sessionStatus.textContent = '❌ The connection hit a snag — try starting a new session';
                             cleanup();
                         },
                         onclose: () => {

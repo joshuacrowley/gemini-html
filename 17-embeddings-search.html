@@ -256,7 +256,7 @@
     <div class="container">
         <div class="header">
             <h1>🔎 Recipe Semantic Search</h1>
-            <p>Find recipes by meaning, not keywords, using Gemini embeddings</p>
+            <p>Find recipes by meaning, not keywords — search like you'd ask a friend</p>
         </div>
 
         <div class="api-key-section">
@@ -269,11 +269,11 @@
 
         <div class="content-section">
             <div class="explainer">
-                <strong>How it works:</strong> each recipe below is converted into an embedding
-                (a vector of numbers capturing its meaning) with <code>gemini-embedding-2</code>.
-                Your query is embedded the same way, and recipes are ranked by cosine similarity —
-                so "something warm for a rainy day" finds soups and stews even though no recipe
-                contains those words.
+                <strong>How it works:</strong> Gemini reads each recipe and turns it into a long
+                list of numbers that captures what it's <em>about</em> — cozy, spicy, sweet, quick.
+                Your search gets the same treatment, and the recipes whose numbers sit closest to
+                your search win. That's why "something warm for a rainy day" finds soups and stews
+                even though no recipe contains those words.
             </div>
 
             <div class="search-row">
@@ -289,10 +289,10 @@
                 <span class="suggestion-chip">kid-friendly weeknight dinner</span>
             </div>
 
-            <div class="index-status" id="indexStatus">📚 24 recipes in the cookbook — embeddings are computed on your first search and cached.</div>
+            <div class="index-status" id="indexStatus">📚 24 recipes in the cookbook — your first search takes a moment longer while the AI reads them all.</div>
 
             <div class="results" id="results">
-                <div class="loading">Search results ranked by semantic similarity will appear here...</div>
+                <div class="loading">Your best matches, ranked by how closely they fit, will appear here...</div>
             </div>
         </div>
     </div>
@@ -395,7 +395,7 @@
         }
 
         async function embedRecipes() {
-            indexStatus.textContent = '⚙️ Embedding the cookbook (one-time, then cached)...';
+            indexStatus.textContent = '📖 Reading the cookbook (first search only)...';
 
             // Wrapping each input in its own Content object returns one
             // embedding per recipe (a flat list would be aggregated into one)
@@ -405,7 +405,7 @@
             });
 
             recipeEmbeddings = response.embeddings.map(e => e.values);
-            indexStatus.textContent = `📚 24 recipes embedded (${recipeEmbeddings[0].length} dimensions each) — cached for this session.`;
+            indexStatus.textContent = `📚 Cookbook read! Each recipe is now described by ${recipeEmbeddings[0].length.toLocaleString()} numbers — searches are instant from here on.`;
         }
 
         function cosineSimilarity(a, b) {

@@ -278,14 +278,14 @@
                 <button id="saveApiKey">Save Key</button>
             </div>
             <div class="api-status" id="apiStatus">Enter your Google AI API key to start creating</div>
-            <div class="paid-notice">⚠️ Image generation uses Nano Banana 2 (<code>gemini-3.1-flash-image</code>) and requires a paid API key.</div>
+            <div class="paid-notice">⚠️ Creating pictures isn't part of Google's free tier, so this demo needs a paid API key.</div>
         </div>
 
         <div class="content-section">
             <div class="canvas-area" id="canvasArea">
                 <div class="placeholder">
-                    🍲 Describe a dish to generate it, then keep chatting to refine it.<br>
-                    Each edit builds on the previous image — the model remembers the conversation.
+                    🍲 Describe a dish and a picture of it will appear here.<br>
+                    Then keep tweaking it — "add steam", "moodier lighting" — each edit builds on the last picture.
                 </div>
             </div>
 
@@ -419,7 +419,7 @@
                 }
 
                 if (!imageData) {
-                    throw new Error(response.text || 'No image returned — the model may have replied with text only. Try rephrasing.');
+                    throw new Error(response.text || 'The AI replied with words instead of a picture — try rephrasing your request.');
                 }
 
                 const dataUrl = `data:${mimeType};base64,${imageData}`;

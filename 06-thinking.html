@@ -320,7 +320,7 @@
                         <option value="high">High (Deepest reasoning)</option>
                     </select>
                     <small style="color: #666; font-size: 0.8rem; margin-top: 4px;" id="levelInfo">
-                        Gemini 3 models use thinking levels instead of token budgets
+                        Higher levels think more carefully but take longer
                     </small>
                 </div>
                 
@@ -441,12 +441,10 @@ What's the fastest way to bake enough cake for everyone?</div>
                 if (thinkingLevel.value === 'minimal') {
                     thinkingLevel.value = 'low';
                 }
-                levelInfo.textContent = 'Pro: low / medium / high (default: high, cannot use minimal)';
+                levelInfo.textContent = 'This model always thinks at least a little — "Minimal" isn\'t available';
             } else {
                 minimalOption.disabled = false;
-                levelInfo.textContent = model === 'gemini-3.1-flash-lite'
-                    ? 'Flash-Lite: minimal / low / medium / high (default: minimal)'
-                    : 'Flash: minimal / low / medium / high (default: medium)';
+                levelInfo.textContent = 'Higher levels think more carefully but take longer';
             }
         }
 

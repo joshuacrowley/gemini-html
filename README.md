@@ -15,8 +15,8 @@ A collection of interactive HTML demos showcasing the capabilities of Google's G
 ### 1. Text Generation (`01-text-generation.html`)
 📝 **Recipe Writing Assistant**  
 Generate creative and sophisticated recipes with AI. Create gourmet "Invisible Soup" recipes with adjustable creativity levels.
-- Prompt-based creativity steering
-- System instructions
+- Pick how adventurous the recipes should be
+- Choose the AI's personality (home cook to molecular gastronomist)
 - Creative writing
 
 ### 2. Image Generation (`02-image-generation.html`) 🍌
@@ -44,25 +44,24 @@ Process long cookbook chapters to extract specific recipes. Analyze large docume
 
 ### 5. Structured Output (`05-structured-output.html`)
 📊 **Restaurant Menu Database**  
-Convert menu descriptions into structured JSON data. Transform text into organized database-ready formats.
-- JSON schema validation
-- Data structuring
+Turn free-flowing menu descriptions into neat, organized data — the kind a spreadsheet or database could use.
+- From messy text to tidy tables
+- You define the exact format you want back
 - Menu parsing
 
 ### 6. Thinking Mode (`06-thinking.html`)
 🧠 **Kitchen Problem Solver**  
 Solve complex cooking puzzles with step-by-step reasoning. Watch AI think through cake baking optimization problems.
-- Adjustable thinking levels (minimal/low/medium/high)
-- Step-by-step reasoning
-- Math problems
-- Logical deduction
+- Choose how deeply the AI thinks (quick answer vs. careful reasoning)
+- Peek at its step-by-step thought process
+- Math problems and logical deduction
 
 ### 7. Document Processing (`07-document-processing.html`)
 📄 **Recipe Card Digitizer**  
 Extract text from handwritten recipe cards. Digitize grandma's cursive writing and margin notes with AI.
-- Handwriting OCR
-- Image upload support
-- Text structure preservation
+- Reads handwriting, even cursive
+- Upload a photo of any recipe card
+- Keeps the recipe's structure intact
 
 ### 8. Image Understanding (`08-image-understanding.html`)
 🖼️ **Fridge Inspector**  
@@ -87,10 +86,10 @@ Transcribe cooking podcasts and extract timing information. Find all cooking dur
 
 ### 11. Function Calling (`11-function-calling.html`)
 🔧 **Smart Kitchen Assistant**  
-Control kitchen timers with natural language. Set, adjust, and manage multiple cooking timers through conversation.
-- Natural language processing
-- Timer control
-- Function calls
+Control kitchen timers just by asking. Say "set a timer for 10 minutes for pasta" and the AI presses the buttons for you.
+- Plain-English commands
+- Set, extend, and cancel multiple timers
+- Shows you exactly which action the AI chose to take
 
 ### 12. Google Search Integration (`12-google-search.html`)
 🔍 **Restaurant Fact Checker**  
@@ -115,42 +114,42 @@ Extract and compare recipes from food blog URLs. Analyze baking times, temperatu
 
 ### 15. Streaming & Multi-Turn Chat (`15-streaming-chat.html`)
 👨‍🍳 **Sous-Chef Chat**  
-Chat with an AI sous-chef that remembers the conversation. Responses stream in token by token.
-- Streaming responses (`sendMessageStream`)
-- Server-managed chat history (`ai.chats.create`)
-- Time-to-first-token stats
+Chat with an AI sous-chef that remembers the whole conversation. Replies appear word by word as they're written, so you're never staring at a spinner.
+- Replies stream in live, word by word
+- Remembers earlier messages — ask follow-ups like "now make it vegetarian"
+- Shows how quickly each reply started
 
 ### 16. Conversational Image Editing (`16-image-editing-chat.html`)
 🎨 **Dish Refinement Studio**  
-Generate a dish with Nano Banana 2, then refine it turn by turn — add steam, change the lighting, swap the plate.
-- Iterative image editing in a chat session
-- Version history strip
-- Multi-turn visual consistency
+Create a picture of a dish, then keep tweaking it — add steam, change the lighting, swap the plate. Each edit builds on the last image.
+- Edit the same picture over multiple turns
+- A strip of thumbnails lets you revisit every version
+- The dish stays recognizably "yours" between edits
 
 > **Note:** Like demo #2, this uses Nano Banana 2 (`gemini-3.1-flash-image`) and requires a **paid API token**.
 
-### 17. Embeddings (`17-embeddings-search.html`)
+### 17. Search by Meaning (`17-embeddings-search.html`)
 🔎 **Recipe Semantic Search**  
-Search a cookbook by meaning, not keywords. "Something warm for a rainy day" finds soups and stews.
-- Text embeddings (`gemini-embedding-2`)
-- Cosine similarity ranking in the browser
-- Asymmetric query/document task prefixes
+Search a cookbook the way you'd ask a friend. "Something warm for a rainy day" finds soups and stews — even though no recipe contains those words.
+- Finds recipes by meaning, not exact keywords
+- Results ranked by how closely they match your intent
+- Powered by "embeddings" — Gemini turns text into numbers that capture meaning
 
-### 18. Spatial Understanding (`18-spatial-understanding.html`)
+### 18. Finding Things in Photos (`18-spatial-understanding.html`)
 📦 **Pantry Shelf Scanner**  
-Upload a photo of your pantry or countertop and watch Gemini locate every item with labeled bounding boxes.
-- Object detection with `box_2d` coordinates
-- Canvas overlay rendering
-- Structured JSON output
+Upload a photo of your pantry or countertop and watch Gemini find every item and draw a labeled box around it.
+- Spots and names each item in the photo
+- Draws boxes right on your picture
+- Hover a label to highlight where it is
 
-### 19. Live API (`19-live-audio.html`)
+### 19. Real-Time Voice (`19-live-audio.html`)
 🎙️ **Hands-Free Cooking Coach**  
-Have a real-time voice conversation with a cooking coach while your hands are busy.
-- Bidirectional audio streaming over WebSocket
-- Voice activity detection (interrupt by speaking)
-- Live transcription of both sides
+Have an actual spoken conversation with a cooking coach while your hands are covered in flour. No typing, no tapping.
+- Talk and listen in real time, like a phone call
+- Interrupt just by speaking — the coach stops and listens
+- A live transcript shows both sides of the conversation
 
-> **Note:** Requires microphone access. Use headphones to avoid the coach hearing itself.
+> **Note:** Requires microphone access. Wear headphones so the coach doesn't hear itself talking.
 
 ## 🎯 How to Use
 
@@ -176,14 +175,15 @@ Each demo will prompt you to enter your Google AI API key on first use. The key 
 
 ## ⚠️ Important Notes
 
-- **Demos #2 and #16 (Image Generation/Editing)** require a **paid API token** as they use Nano Banana 2 (`gemini-3.1-flash-image`)
-- **Demo #19 (Live API)** needs microphone permission and works best over HTTPS or `localhost`
-- All other demos work with the free API tier
-- API keys are stored in your browser's localStorage
-- No server or build process is required
-- Each file is completely standalone
+- **Demos #2 and #16 (image creation and editing)** need a **paid API key** — image generation isn't part of the free tier
+- **Demo #19 (voice conversation)** will ask permission to use your microphone
+- All other demos work with a free API key
+- Your API key is saved in your own browser only
+- Nothing to install — each file works on its own
 
 ## 🛠️ Technical Details
+
+*For the curious — you don't need to understand any of this to use the demos.*
 
 - Pure HTML/CSS/JavaScript - no frameworks required
 - Uses the `@google/genai` SDK via CDN (esm.sh)
@@ -203,10 +203,11 @@ Each demo will prompt you to enter your Google AI API key on first use. The key 
 
 ### Agent Skills
 
-The repo vendors the official [Gemini API skills](https://github.com/google-gemini/gemini-skills)
-under [`.cursor/skills/`](.cursor/skills/) so coding agents working on these demos
-have current model names, SDK usage, and best practices (which post-date most
-models' training data). See [`.cursor/skills/README.md`](.cursor/skills/README.md).
+The repo includes a copy of the official [Gemini API skills](https://github.com/google-gemini/gemini-skills)
+in [`.cursor/skills/`](.cursor/skills/). These are reference guides that AI coding
+assistants (like Cursor) read automatically, so if you ask an AI to modify or extend
+these demos, it will use current model names and best practices instead of outdated
+ones. See [`.cursor/skills/README.md`](.cursor/skills/README.md).
 
 ## 📖 Resources
 

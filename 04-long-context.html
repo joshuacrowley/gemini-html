@@ -661,7 +661,7 @@
                     // Show warning about truncation
                     const warning = document.createElement('div');
                     warning.style.cssText = 'background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 8px; margin-top: 10px; color: #856404;';
-                    warning.innerHTML = '⚠️ Response was truncated due to token limit. Some recipes may be missing. Try using Gemini 3.1 Pro for longer responses.';
+                    warning.innerHTML = '⚠️ The answer was cut short because it hit its length limit, so some recipes may be missing. Try the Gemini 3.1 Pro model for longer answers.';
                     outputContent.appendChild(warning);
                 } catch (secondError) {
                     throw new Error(`JSON parsing failed: ${parseError.message}`);

@@ -259,7 +259,7 @@
     <div class="container">
         <div class="header">
             <h1>👨‍🍳 Sous-Chef Chat</h1>
-            <p>A streaming, multi-turn conversation with your AI kitchen assistant</p>
+            <p>A live back-and-forth conversation with your AI kitchen assistant</p>
         </div>
 
         <div class="api-key-section">
@@ -277,7 +277,7 @@
             </div>
 
             <div class="chat-messages" id="chatMessages">
-                <div class="message system">Ask your sous-chef anything! Responses stream in token by token.</div>
+                <div class="message system">Ask your sous-chef anything! Replies appear word by word, as they're written.</div>
             </div>
 
             <div class="input-row">
@@ -424,7 +424,7 @@
                 const totalTime = performance.now() - startTime;
                 const stats = document.createElement('div');
                 stats.className = 'stream-stats';
-                stats.textContent = `⚡ First token in ${Math.round(firstTokenTime ?? totalTime)}ms · complete in ${(totalTime / 1000).toFixed(1)}s`;
+                stats.textContent = `⚡ Started replying in ${((firstTokenTime ?? totalTime) / 1000).toFixed(1)}s · finished in ${(totalTime / 1000).toFixed(1)}s`;
                 chatMessages.appendChild(stats);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
 

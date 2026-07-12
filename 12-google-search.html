@@ -382,7 +382,7 @@
 
     <script type="module">
         // Import Google GenAI using ESM
-        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@latest";
+        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@^2.11.0";
 
         let apiKey = localStorage.getItem('googleAiApiKey') || '';
         let ai = null;
@@ -465,12 +465,14 @@ Return a JSON array with objects containing:
 Use your knowledge to verify these claims about The French Laundry restaurant.`;
 
             const response = await ai.models.generateContent({
-                model: "gemini-2.5-flash",
+                model: "gemini-3.5-flash",
                 contents: [{ text: prompt }],
-                tools: [{
-                    googleSearch: {}
-                }],
-                generationConfig: {
+                config: {
+                    // Gemini 3 supports combining Google Search grounding
+                    // with structured (JSON) output in a single request
+                    tools: [{
+                        googleSearch: {}
+                    }],
                     responseMimeType: "application/json",
                     responseSchema: {
                         type: Type.ARRAY,

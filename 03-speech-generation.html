@@ -317,7 +317,7 @@ Host: Chefs, you have 30 minutes. Your time starts... NOW!</textarea>
 
     <script type="module">
         // Import Google GenAI using ESM
-        import { GoogleGenAI } from "https://esm.sh/@google/genai@latest";
+        import { GoogleGenAI } from "https://esm.sh/@google/genai@^2.11.0";
 
         let apiKey = localStorage.getItem('googleAiApiKey') || '';
         let ai = null;
@@ -436,7 +436,7 @@ Host: Chefs, you have 30 minutes. Your time starts... NOW!</textarea>
             };
 
             const response = await ai.models.generateContent({
-                model: "gemini-2.5-flash-preview-tts",
+                model: "gemini-3.1-flash-tts-preview",
                 contents: [{ text: processedText }],
                 config: {
                     responseModalities: ['AUDIO'],
@@ -528,7 +528,7 @@ Host: Chefs, you have 30 minutes. Your time starts... NOW!</textarea>
                         <button class="audio-btn download-btn" onclick="downloadAudio('${audioUrl}')">⬇️ Download Audio</button>
                     </div>
                     <div class="audio-info">
-                        ✅ Generated using Gemini 2.5 Flash TTS
+                        ✅ Generated using Gemini 3.1 Flash TTS
                     </div>
                 </div>
             `;

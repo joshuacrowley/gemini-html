@@ -250,7 +250,7 @@
 
     <script type="module">
         // Import Google GenAI using ESM
-        import { GoogleGenAI } from "https://esm.sh/@google/genai@latest";
+        import { GoogleGenAI } from "https://esm.sh/@google/genai@^2.11.0";
 
         let apiKey = localStorage.getItem('googleAiApiKey') || '';
         let ai = null;
@@ -334,7 +334,7 @@ img.src = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBYRXhpZgAATU0AKg
             const plateImageBase64 = await loadPlateImage();
 
             const response = await ai.models.generateContent({
-                model: "gemini-2.5-flash-image-preview",
+                model: "gemini-3.1-flash-image", // Nano Banana 2
                 contents: [
                     { text: enhancedPrompt },
                     {

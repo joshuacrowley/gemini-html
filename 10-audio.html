@@ -445,7 +445,7 @@
 
     <script type="module">
         // Import Google GenAI using ESM
-        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@latest";
+        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@^2.11.0";
 
         let apiKey = localStorage.getItem('googleAiApiKey') || '';
         let ai = null;
@@ -613,7 +613,7 @@
                 console.log('Using MIME type:', mimeType);
                 
                 const transcriptResponse = await ai.models.generateContent({
-                    model: "gemini-2.5-flash",
+                    model: "gemini-3.5-flash",
                     contents: [
                         { text: "Please provide a transcript of this audio content. Focus on any cooking instructions, timing mentions, and recipe details." },
                         {
@@ -637,9 +637,9 @@
 Transcript: ${transcriptResponse.text}`;
 
                 const timingResponse = await ai.models.generateContent({
-                    model: "gemini-2.5-flash",
+                    model: "gemini-3.5-flash",
                     contents: [{ text: timingPrompt }],
-                    generationConfig: {
+                    config: {
                         responseMimeType: "application/json",
                         responseSchema: {
                             type: Type.ARRAY,

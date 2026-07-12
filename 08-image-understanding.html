@@ -409,7 +409,7 @@
 
     <script type="module">
         // Import Google GenAI using ESM
-        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@latest";
+        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@^2.11.0";
 
         let apiKey = localStorage.getItem('googleAiApiKey') || '';
         let ai = null;
@@ -561,7 +561,7 @@
 
         async function identifyIngredients(base64Image) {
             const response = await ai.models.generateContent({
-                model: "gemini-2.5-flash",
+                model: "gemini-3.5-flash",
                 contents: [{
                     text: "Identify all food items and ingredients visible in this fridge photo. Return a JSON array of objects with 'name', 'icon' (single emoji), and 'confidence' (percentage as string like '95%') for each item you can identify."
                 }, {
@@ -570,7 +570,7 @@
                         data: base64Image,
                     },
                 }],
-                generationConfig: {
+                config: {
                     responseMimeType: "application/json",
                     responseSchema: {
                         type: Type.ARRAY,
@@ -610,7 +610,7 @@
             const fullQuestion = question + mealTypeFilter + " Return a JSON array of meal suggestions with 'name', 'description', and 'type' (Breakfast/Lunch/Dinner/Snack) for each meal.";
 
             const response = await ai.models.generateContent({
-                model: "gemini-2.5-flash",
+                model: "gemini-3.5-flash",
                 contents: [{
                     text: fullQuestion
                 }, {
@@ -619,7 +619,7 @@
                         data: base64Image,
                     },
                 }],
-                generationConfig: {
+                config: {
                     responseMimeType: "application/json",
                     responseSchema: {
                         type: Type.ARRAY,

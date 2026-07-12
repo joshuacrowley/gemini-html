@@ -389,7 +389,7 @@ def scale_recipe(servings):
 
     <script type="module">
         // Import Google GenAI using ESM
-        import { GoogleGenAI } from "https://esm.sh/@google/genai@latest";
+        import { GoogleGenAI } from "https://esm.sh/@google/genai@^2.11.0";
 
         let apiKey = localStorage.getItem('googleAiApiKey') || '';
         let ai = null;
@@ -479,7 +479,7 @@ Requirements:
 - Print both original and scaled ingredient amounts`;
 
             const response = await ai.models.generateContent({
-                model: "gemini-2.5-flash",
+                model: "gemini-3.5-flash",
                 contents: [{ text: codePrompt }],
                 config: {
                     tools: [{ codeExecution: {} }]

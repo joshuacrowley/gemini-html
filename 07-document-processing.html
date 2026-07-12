@@ -390,7 +390,7 @@
 
     <script type="module">
         // Import Google GenAI using ESM
-        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@latest";
+        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@^2.11.0";
 
         let apiKey = localStorage.getItem('googleAiApiKey') || '';
         let ai = null;
@@ -525,7 +525,7 @@
                     : `Extract all text from this recipe card image.`;
 
                 const response = await ai.models.generateContent({
-                    model: "gemini-2.5-flash",
+                    model: "gemini-3.5-flash",
                     contents: [{
                         text: prompt,
                     }, {
@@ -577,9 +577,9 @@
 Text: ${extractedContent}`;
 
                 const response = await ai.models.generateContent({
-                    model: "gemini-2.5-flash",
+                    model: "gemini-3.5-flash",
                     contents: [{ text: structurePrompt }],
-                    generationConfig: {
+                    config: {
                         responseMimeType: "application/json",
                         responseSchema: {
                             type: Type.OBJECT,

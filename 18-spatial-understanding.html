@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pantry Shelf Scanner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #7F00FF 0%, #E100FF 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .api-key-section {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .api-key-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #apiKeyInput {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        #apiKeyInput:focus {
+            outline: none;
+            border-color: #7F00FF;
+        }
+
+        #saveApiKey {
+            padding: 10px 20px;
+            background: #7F00FF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        #saveApiKey:hover {
+            background: #6A00D6;
+        }
+
+        .api-status {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .api-status.success {
+            color: #7F00FF;
+        }
+
+        .content-section {
+            padding: 30px;
+        }
+
+        .upload-section {
+            border: 3px dashed #d5c1f0;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: #7F00FF;
+        }
+
+        .upload-section p {
+            color: #888;
+            line-height: 1.6;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .canvas-wrap {
+            position: relative;
+            display: none;
+            margin: 0 auto 20px;
+            max-width: 100%;
+        }
+
+        #imageCanvas {
+            max-width: 100%;
+            border-radius: 12px;
+            display: block;
+        }
+
+        .scan-btn {
+            width: 100%;
+            padding: 15px;
+            background: #7F00FF;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .scan-btn:hover {
+            background: #6A00D6;
+        }
+
+        .scan-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .detections {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .detection-tag {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .output-note {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 15px;
+            line-height: 1.5;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 12px 16px;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .api-key-group {
+                flex-direction: column;
+            }
+
+            #saveApiKey {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 Pantry Shelf Scanner</h1>
+            <p>Detect and locate every ingredient with bounding boxes</p>
+        </div>
+
+        <div class="api-key-section">
+            <div class="api-key-group">
+                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI API key..." maxlength="100">
+                <button id="saveApiKey">Save Key</button>
+            </div>
+            <div class="api-status" id="apiStatus">Enter your Google AI API key to start scanning</div>
+        </div>
+
+        <div class="content-section">
+            <div class="upload-section" id="uploadSection">
+                <p>📷 <strong>Click to upload</strong> a photo of your pantry shelf, countertop, or ingredients<br>
+                Gemini will find each item and draw a labeled box around it</p>
+            </div>
+            <input type="file" id="fileInput" accept="image/*">
+
+            <div class="canvas-wrap" id="canvasWrap">
+                <canvas id="imageCanvas"></canvas>
+            </div>
+
+            <button class="scan-btn" id="scanBtn" disabled>Scan Shelf</button>
+
+            <div class="detections" id="detections"></div>
+
+            <div class="output-note">
+                💡 The model returns each item's <code>box_2d</code> as
+                <code>[ymin, xmin, ymax, xmax]</code> normalized to 0–1000, which this page
+                scales to the image size and draws on a canvas overlay. Click a tag to
+                highlight its box.
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Google GenAI using ESM
+        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@^2.11.0";
+
+        let apiKey = localStorage.getItem('googleAiApiKey') || '';
+        let ai = null;
+        let uploadedImage = null; // { dataUrl, base64, mimeType, img }
+        let lastDetections = [];
+
+        const COLORS = ['#E74C3C', '#8E44AD', '#2E86DE', '#16A085', '#E67E22', '#C0392B', '#27AE60', '#D35400', '#2C3E50', '#AF7AC5'];
+
+        // Initialize elements
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveApiKeyBtn = document.getElementById('saveApiKey');
+        const apiStatus = document.getElementById('apiStatus');
+        const uploadSection = document.getElementById('uploadSection');
+        const fileInput = document.getElementById('fileInput');
+        const canvasWrap = document.getElementById('canvasWrap');
+        const canvas = document.getElementById('imageCanvas');
+        const ctx = canvas.getContext('2d');
+        const scanBtn = document.getElementById('scanBtn');
+        const detections = document.getElementById('detections');
+
+        // Load saved API key
+        if (apiKey) {
+            apiKeyInput.value = apiKey;
+            initializeAI();
+        }
+
+        function initializeAI() {
+            try {
+                ai = new GoogleGenAI({ apiKey: apiKey });
+                apiStatus.textContent = '✅ API key saved and ready!';
+                apiStatus.className = 'api-status success';
+                updateScanButton();
+            } catch (error) {
+                apiStatus.textContent = '❌ Invalid API key';
+                apiStatus.className = 'api-status';
+                scanBtn.disabled = true;
+            }
+        }
+
+        function updateScanButton() {
+            scanBtn.disabled = !(ai && uploadedImage);
+        }
+
+        saveApiKeyBtn.addEventListener('click', () => {
+            apiKey = apiKeyInput.value.trim();
+            if (apiKey) {
+                localStorage.setItem('googleAiApiKey', apiKey);
+                initializeAI();
+            } else {
+                apiStatus.textContent = 'Please enter a valid API key';
+                apiStatus.className = 'api-status';
+            }
+        });
+
+        uploadSection.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                const img = new Image();
+                img.onload = () => {
+                    uploadedImage = {
+                        base64: reader.result.split(',')[1],
+                        mimeType: file.type,
+                        img: img
+                    };
+                    lastDetections = [];
+                    detections.innerHTML = '';
+                    drawImage();
+                    canvasWrap.style.display = 'block';
+                    updateScanButton();
+                };
+                img.src = reader.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function drawImage() {
+            const img = uploadedImage.img;
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            ctx.drawImage(img, 0, 0);
+        }
+
+        scanBtn.addEventListener('click', async () => {
+            if (!ai || !uploadedImage) return;
+
+            scanBtn.disabled = true;
+            detections.innerHTML = '<div class="loading">🔍 Scanning shelf for ingredients...</div>';
+
+            try {
+                const response = await ai.models.generateContent({
+                    model: "gemini-3.5-flash",
+                    contents: [
+                        {
+                            inlineData: {
+                                mimeType: uploadedImage.mimeType,
+                                data: uploadedImage.base64
+                            }
+                        },
+                        {
+                            // Coordinates come back normalized to 0-1000 and are
+                            // scaled to the real image size before drawing
+                            text: "Detect all of the prominent food items, ingredients, and kitchen products in this image. The box_2d should be [ymin, xmin, ymax, xmax] normalized to 0-1000. Use short lowercase labels."
+                        }
+                    ],
+                    config: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: Type.ARRAY,
+                            items: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    label: { type: Type.STRING },
+                                    box_2d: {
+                                        type: Type.ARRAY,
+                                        items: { type: Type.INTEGER }
+                                    }
+                                },
+                                required: ["label", "box_2d"]
+                            }
+                        }
+                    }
+                });
+
+                lastDetections = JSON.parse(response.text);
+                drawDetections();
+                renderTags();
+
+            } catch (error) {
+                console.error('Error scanning image:', error);
+                detections.innerHTML = '<div class="loading">❌ Error scanning image. Please try again.</div>';
+            }
+
+            scanBtn.disabled = false;
+        });
+
+        function drawDetections(highlightIndex = -1) {
+            drawImage();
+
+            // Scale line widths and fonts relative to image size so the
+            // overlay looks right for both phone photos and small images
+            const scale = Math.max(canvas.width, canvas.height) / 1000;
+            const lineWidth = Math.max(2, 3 * scale);
+            const fontSize = Math.max(12, 16 * scale);
+            ctx.font = `bold ${fontSize}px 'Segoe UI', sans-serif`;
+
+            lastDetections.forEach((det, i) => {
+                if (!Array.isArray(det.box_2d) || det.box_2d.length !== 4) return;
+                const color = COLORS[i % COLORS.length];
+                const highlighted = i === highlightIndex;
+
+                // box_2d is [ymin, xmin, ymax, xmax] normalized to 0-1000
+                const y1 = det.box_2d[0] / 1000 * canvas.height;
+                const x1 = det.box_2d[1] / 1000 * canvas.width;
+                const y2 = det.box_2d[2] / 1000 * canvas.height;
+                const x2 = det.box_2d[3] / 1000 * canvas.width;
+
+                ctx.lineWidth = highlighted ? lineWidth * 2 : lineWidth;
+                ctx.strokeStyle = color;
+                ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+
+                if (highlighted) {
+                    ctx.fillStyle = color + '33';
+                    ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
+                }
+
+                // Label background + text
+                const label = det.label || 'item';
+                const textWidth = ctx.measureText(label).width;
+                const pad = 4 * scale;
+                const labelY = Math.max(y1 - fontSize - pad * 2, 0);
+                ctx.fillStyle = color;
+                ctx.fillRect(x1, labelY, textWidth + pad * 2, fontSize + pad * 2);
+                ctx.fillStyle = 'white';
+                ctx.fillText(label, x1 + pad, labelY + fontSize + pad / 2);
+            });
+        }
+
+        function renderTags() {
+            if (lastDetections.length === 0) {
+                detections.innerHTML = '<div class="loading">No items detected — try a clearer photo.</div>';
+                return;
+            }
+
+            detections.innerHTML = lastDetections.map((det, i) => `
+                <span class="detection-tag" data-index="${i}" style="background: ${COLORS[i % COLORS.length]}">${det.label || 'item'}</span>
+            `).join('');
+
+            detections.querySelectorAll('.detection-tag').forEach(tag => {
+                tag.addEventListener('mouseenter', () => drawDetections(parseInt(tag.dataset.index)));
+                tag.addEventListener('mouseleave', () => drawDetections());
+                tag.addEventListener('click', () => drawDetections(parseInt(tag.dataset.index)));
+            });
+        }
+
+        // Initialize
+        updateScanButton();
+    </script>
+</body>
+</html>

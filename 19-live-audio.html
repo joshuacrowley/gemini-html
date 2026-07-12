@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hands-Free Cooking Coach</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .api-key-section {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .api-key-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #apiKeyInput {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        #apiKeyInput:focus {
+            outline: none;
+            border-color: #FF416C;
+        }
+
+        #saveApiKey {
+            padding: 10px 20px;
+            background: #FF416C;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        #saveApiKey:hover {
+            background: #E63A5F;
+        }
+
+        .api-status {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .api-status.success {
+            color: #FF416C;
+        }
+
+        .security-note {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: #856404;
+            background: #fff3cd;
+            padding: 8px 12px;
+            border-radius: 8px;
+            line-height: 1.4;
+        }
+
+        .content-section {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .mic-visual {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            margin: 10px auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            background: #f0f0f0;
+            transition: all 0.3s ease;
+        }
+
+        .mic-visual.listening {
+            background: radial-gradient(circle, #ffe0e7 0%, #ffd0da 100%);
+            animation: pulse 1.6s ease-in-out infinite;
+        }
+
+        .mic-visual.speaking {
+            background: radial-gradient(circle, #e0efff 0%, #cfe4ff 100%);
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 65, 108, 0.35); }
+            50% { box-shadow: 0 0 0 24px rgba(255, 65, 108, 0); }
+        }
+
+        .session-status {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 20px;
+            min-height: 1.4em;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .control-btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.05rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        #startBtn {
+            background: #FF416C;
+            color: white;
+        }
+
+        #startBtn:hover {
+            background: #E63A5F;
+        }
+
+        #startBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        #stopBtn {
+            background: #333;
+            color: white;
+            display: none;
+        }
+
+        .transcript {
+            text-align: left;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            height: 260px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .transcript .line {
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .transcript .line .who {
+            font-weight: 700;
+        }
+
+        .transcript .line.user .who { color: #FF416C; }
+        .transcript .line.coach .who { color: #2E86DE; }
+
+        .transcript .placeholder {
+            color: #999;
+            font-style: italic;
+        }
+
+        .tips {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 15px;
+            line-height: 1.6;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 12px 16px;
+            text-align: left;
+        }
+
+        @media (max-width: 768px) {
+            .api-key-group {
+                flex-direction: column;
+            }
+
+            #saveApiKey {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎙️ Hands-Free Cooking Coach</h1>
+            <p>Talk to Gemini in real time while your hands are covered in flour</p>
+        </div>
+
+        <div class="api-key-section">
+            <div class="api-key-group">
+                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI API key..." maxlength="100">
+                <button id="saveApiKey">Save Key</button>
+            </div>
+            <div class="api-status" id="apiStatus">Enter your Google AI API key to start a voice session</div>
+            <div class="security-note">🔒 This demo connects straight from the browser with your API key for simplicity. In production apps, mint short-lived <strong>ephemeral tokens</strong> on a server instead of shipping the key to the client.</div>
+        </div>
+
+        <div class="content-section">
+            <div class="mic-visual" id="micVisual">🎙️</div>
+            <div class="session-status" id="sessionStatus">Ready when you are — grab your apron!</div>
+
+            <div class="controls">
+                <button class="control-btn" id="startBtn" disabled>Start Cooking Session</button>
+                <button class="control-btn" id="stopBtn">End Session</button>
+            </div>
+
+            <div class="transcript" id="transcript">
+                <div class="placeholder">Live transcripts of both sides of the conversation will appear here...</div>
+            </div>
+
+            <div class="tips">
+                💡 <strong>Try asking:</strong> "How do I know when my steak is medium-rare?" ·
+                "Walk me through folding egg whites" · "My sauce broke, help!"<br>
+                🎧 Use headphones to stop the coach from hearing (and interrupting) itself.
+                You can interrupt the coach at any time by speaking — that's voice activity detection.
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Google GenAI using ESM
+        import { GoogleGenAI } from "https://esm.sh/@google/genai@^2.11.0";
+
+        let apiKey = localStorage.getItem('googleAiApiKey') || '';
+        let ai = null;
+        let session = null;
+
+        // Audio machinery
+        let micStream = null;
+        let inputContext = null;   // 16kHz capture
+        let outputContext = null;  // 24kHz playback
+        let processor = null;
+        let activeSources = [];
+        let nextStartTime = 0;
+
+        // Transcript accumulation (deltas arrive incrementally)
+        let currentUserLine = null;
+        let currentCoachLine = null;
+
+        // Initialize elements
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveApiKeyBtn = document.getElementById('saveApiKey');
+        const apiStatus = document.getElementById('apiStatus');
+        const micVisual = document.getElementById('micVisual');
+        const sessionStatus = document.getElementById('sessionStatus');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const transcript = document.getElementById('transcript');
+
+        // Load saved API key
+        if (apiKey) {
+            apiKeyInput.value = apiKey;
+            initializeAI();
+        }
+
+        function initializeAI() {
+            try {
+                ai = new GoogleGenAI({ apiKey: apiKey });
+                apiStatus.textContent = '✅ API key saved and ready!';
+                apiStatus.className = 'api-status success';
+                startBtn.disabled = false;
+            } catch (error) {
+                apiStatus.textContent = '❌ Invalid API key';
+                apiStatus.className = 'api-status';
+                startBtn.disabled = true;
+            }
+        }
+
+        saveApiKeyBtn.addEventListener('click', () => {
+            apiKey = apiKeyInput.value.trim();
+            if (apiKey) {
+                localStorage.setItem('googleAiApiKey', apiKey);
+                initializeAI();
+            } else {
+                apiStatus.textContent = 'Please enter a valid API key';
+                apiStatus.className = 'api-status';
+            }
+        });
+
+        startBtn.addEventListener('click', startSession);
+        stopBtn.addEventListener('click', stopSession);
+
+        async function startSession() {
+            if (!ai) {
+                alert('Please enter your Google AI API key first');
+                return;
+            }
+
+            startBtn.disabled = true;
+            sessionStatus.textContent = '🎤 Requesting microphone access...';
+
+            try {
+                micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            } catch (error) {
+                sessionStatus.textContent = '❌ Microphone access denied';
+                startBtn.disabled = false;
+                return;
+            }
+
+            sessionStatus.textContent = '🔌 Connecting to the Live API...';
+            transcript.innerHTML = '';
+            currentUserLine = null;
+            currentCoachLine = null;
+
+            try {
+                // The Live API streams audio both ways over a WebSocket
+                session = await ai.live.connect({
+                    model: 'gemini-3.1-flash-live-preview',
+                    config: {
+                        responseModalities: ['AUDIO'],
+                        systemInstruction: {
+                            parts: [{ text: 'You are an upbeat, hands-free cooking coach. The user is actively cooking and cannot touch a screen. Give short, clear spoken guidance, one step at a time. Ask brief follow-up questions when helpful.' }]
+                        },
+                        // Ask for text transcripts of both sides of the audio
+                        inputAudioTranscription: {},
+                        outputAudioTranscription: {}
+                    },
+                    callbacks: {
+                        onopen: () => {
+                            sessionStatus.textContent = '🍳 Connected! Say hello to your coach.';
+                            micVisual.classList.add('listening');
+                            micVisual.textContent = '👂';
+                            stopBtn.style.display = 'inline-block';
+                            startBtn.style.display = 'none';
+                            startMicCapture();
+                        },
+                        onmessage: handleServerMessage,
+                        onerror: (e) => {
+                            console.error('Live session error:', e);
+                            sessionStatus.textContent = '❌ Session error — see console for details';
+                            cleanup();
+                        },
+                        onclose: () => {
+                            sessionStatus.textContent = '👋 Session ended. Bon appétit!';
+                            cleanup();
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error connecting:', error);
+                sessionStatus.textContent = '❌ Could not connect. Check your API key and try again.';
+                cleanup();
+            }
+        }
+
+        function startMicCapture() {
+            // Capture mic audio at 16kHz and convert to 16-bit PCM chunks —
+            // the input format the Live API expects (audio/pcm;rate=16000)
+            inputContext = new AudioContext({ sampleRate: 16000 });
+            const source = inputContext.createMediaStreamSource(micStream);
+            processor = inputContext.createScriptProcessor(4096, 1, 1);
+
+            processor.onaudioprocess = (e) => {
+                if (!session) return;
+                const float32 = e.inputBuffer.getChannelData(0);
+                const int16 = new Int16Array(float32.length);
+                for (let i = 0; i < float32.length; i++) {
+                    const s = Math.max(-1, Math.min(1, float32[i]));
+                    int16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+                }
+                session.sendRealtimeInput({
+                    audio: {
+                        data: base64FromArrayBuffer(int16.buffer),
+                        mimeType: 'audio/pcm;rate=16000'
+                    }
+                });
+            };
+
+            source.connect(processor);
+            processor.connect(inputContext.destination);
+
+            // Playback context at the Live API's 24kHz output rate
+            outputContext = new AudioContext({ sampleRate: 24000 });
+            nextStartTime = 0;
+        }
+
+        function handleServerMessage(message) {
+            const content = message.serverContent;
+            if (!content) return;
+
+            // The model was interrupted by the user speaking — stop playback
+            // immediately and clear the queued audio
+            if (content.interrupted) {
+                activeSources.forEach(s => { try { s.stop(); } catch (_) {} });
+                activeSources = [];
+                nextStartTime = 0;
+                setSpeaking(false);
+                return;
+            }
+
+            // A single event can carry several parts (audio + transcript),
+            // so always walk all of them
+            if (content.modelTurn?.parts) {
+                for (const part of content.modelTurn.parts) {
+                    if (part.inlineData?.data) {
+                        playAudioChunk(part.inlineData.data);
+                    }
+                }
+            }
+
+            if (content.inputTranscription?.text) {
+                appendTranscript('user', content.inputTranscription.text);
+            }
+            if (content.outputTranscription?.text) {
+                appendTranscript('coach', content.outputTranscription.text);
+            }
+
+            if (content.turnComplete) {
+                // Next transcript deltas belong to a new turn
+                currentUserLine = null;
+                currentCoachLine = null;
+            }
+        }
+
+        function playAudioChunk(base64Data) {
+            if (!outputContext) return;
+            setSpeaking(true);
+
+            // Decode base64 → Int16 PCM → Float32 samples
+            const bytes = atob(base64Data);
+            const buffer = new ArrayBuffer(bytes.length);
+            const view = new Uint8Array(buffer);
+            for (let i = 0; i < bytes.length; i++) view[i] = bytes.charCodeAt(i);
+            const int16 = new Int16Array(buffer);
+            const float32 = new Float32Array(int16.length);
+            for (let i = 0; i < int16.length; i++) float32[i] = int16[i] / 32768;
+
+            const audioBuffer = outputContext.createBuffer(1, float32.length, 24000);
+            audioBuffer.getChannelData(0).set(float32);
+
+            // Schedule chunks back to back for gapless playback
+            const sourceNode = outputContext.createBufferSource();
+            sourceNode.buffer = audioBuffer;
+            sourceNode.connect(outputContext.destination);
+            nextStartTime = Math.max(nextStartTime, outputContext.currentTime);
+            sourceNode.start(nextStartTime);
+            nextStartTime += audioBuffer.duration;
+
+            activeSources.push(sourceNode);
+            sourceNode.onended = () => {
+                activeSources = activeSources.filter(s => s !== sourceNode);
+                if (activeSources.length === 0) setSpeaking(false);
+            };
+        }
+
+        function setSpeaking(speaking) {
+            if (speaking) {
+                micVisual.classList.remove('listening');
+                micVisual.classList.add('speaking');
+                micVisual.textContent = '🗣️';
+            } else if (session) {
+                micVisual.classList.remove('speaking');
+                micVisual.classList.add('listening');
+                micVisual.textContent = '👂';
+            }
+        }
+
+        function appendTranscript(who, text) {
+            const isUser = who === 'user';
+            let line = isUser ? currentUserLine : currentCoachLine;
+
+            if (!line) {
+                line = document.createElement('div');
+                line.className = `line ${who}`;
+                line.innerHTML = `<span class="who">${isUser ? '🧑‍🍳 You:' : '🤖 Coach:'}</span> <span class="text"></span>`;
+                transcript.appendChild(line);
+                if (isUser) currentUserLine = line; else currentCoachLine = line;
+            }
+
+            line.querySelector('.text').textContent += text;
+            transcript.scrollTop = transcript.scrollHeight;
+        }
+
+        function stopSession() {
+            if (session) {
+                try { session.close(); } catch (_) {}
+                session = null;
+            }
+            cleanup();
+            sessionStatus.textContent = '👋 Session ended. Bon appétit!';
+        }
+
+        function cleanup() {
+            session = null;
+            if (processor) { try { processor.disconnect(); } catch (_) {} processor = null; }
+            if (inputContext) { try { inputContext.close(); } catch (_) {} inputContext = null; }
+            if (outputContext) { try { outputContext.close(); } catch (_) {} outputContext = null; }
+            if (micStream) {
+                micStream.getTracks().forEach(t => t.stop());
+                micStream = null;
+            }
+            activeSources = [];
+            nextStartTime = 0;
+            micVisual.classList.remove('listening', 'speaking');
+            micVisual.textContent = '🎙️';
+            stopBtn.style.display = 'none';
+            startBtn.style.display = 'inline-block';
+            startBtn.disabled = !apiKey;
+        }
+
+        function base64FromArrayBuffer(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            const chunkSize = 0x8000;
+            for (let i = 0; i < bytes.length; i += chunkSize) {
+                binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+            }
+            return btoa(binary);
+        }
+
+        // Initialize
+        startBtn.disabled = !apiKey;
+    </script>
+</body>
+</html>

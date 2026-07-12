@@ -113,6 +113,45 @@ Extract and compare recipes from food blog URLs. Analyze baking times, temperatu
 - Recipe extraction
 - Comparison analysis
 
+### 15. Streaming & Multi-Turn Chat (`15-streaming-chat.html`)
+👨‍🍳 **Sous-Chef Chat**  
+Chat with an AI sous-chef that remembers the conversation. Responses stream in token by token.
+- Streaming responses (`sendMessageStream`)
+- Server-managed chat history (`ai.chats.create`)
+- Time-to-first-token stats
+
+### 16. Conversational Image Editing (`16-image-editing-chat.html`)
+🎨 **Dish Refinement Studio**  
+Generate a dish with Nano Banana 2, then refine it turn by turn — add steam, change the lighting, swap the plate.
+- Iterative image editing in a chat session
+- Version history strip
+- Multi-turn visual consistency
+
+> **Note:** Like demo #2, this uses Nano Banana 2 (`gemini-3.1-flash-image`) and requires a **paid API token**.
+
+### 17. Embeddings (`17-embeddings-search.html`)
+🔎 **Recipe Semantic Search**  
+Search a cookbook by meaning, not keywords. "Something warm for a rainy day" finds soups and stews.
+- Text embeddings (`gemini-embedding-2`)
+- Cosine similarity ranking in the browser
+- Asymmetric query/document task prefixes
+
+### 18. Spatial Understanding (`18-spatial-understanding.html`)
+📦 **Pantry Shelf Scanner**  
+Upload a photo of your pantry or countertop and watch Gemini locate every item with labeled bounding boxes.
+- Object detection with `box_2d` coordinates
+- Canvas overlay rendering
+- Structured JSON output
+
+### 19. Live API (`19-live-audio.html`)
+🎙️ **Hands-Free Cooking Coach**  
+Have a real-time voice conversation with a cooking coach while your hands are busy.
+- Bidirectional audio streaming over WebSocket
+- Voice activity detection (interrupt by speaking)
+- Live transcription of both sides
+
+> **Note:** Requires microphone access. Use headphones to avoid the coach hearing itself.
+
 ## 🎯 How to Use
 
 ### Running the Demos
@@ -137,7 +176,8 @@ Each demo will prompt you to enter your Google AI API key on first use. The key 
 
 ## ⚠️ Important Notes
 
-- **Demo #2 (Image Generation)** requires a **paid API token** as it uses Nano Banana 2 (`gemini-3.1-flash-image`)
+- **Demos #2 and #16 (Image Generation/Editing)** require a **paid API token** as they use Nano Banana 2 (`gemini-3.1-flash-image`)
+- **Demo #19 (Live API)** needs microphone permission and works best over HTTPS or `localhost`
 - All other demos work with the free API tier
 - API keys are stored in your browser's localStorage
 - No server or build process is required
@@ -154,10 +194,19 @@ Each demo will prompt you to enter your Google AI API key on first use. The key 
 
 | Demo | Model |
 |------|-------|
-| Text, documents, images, video, audio, tools (1, 5, 7–14) | `gemini-3.5-flash` |
-| Image generation (2) | `gemini-3.1-flash-image` (Nano Banana 2) |
+| Text, documents, images, video, audio, tools (1, 5, 7–15, 18) | `gemini-3.5-flash` |
+| Image generation & editing (2, 16) | `gemini-3.1-flash-image` (Nano Banana 2) |
 | Speech generation (3) | `gemini-3.1-flash-tts-preview` |
 | Long context & thinking (4, 6) | `gemini-3.1-pro-preview`, `gemini-3.5-flash`, or `gemini-3.1-flash-lite` (selectable) |
+| Embeddings (17) | `gemini-embedding-2` |
+| Real-time voice (19) | `gemini-3.1-flash-live-preview` |
+
+### Agent Skills
+
+The repo vendors the official [Gemini API skills](https://github.com/google-gemini/gemini-skills)
+under [`.cursor/skills/`](.cursor/skills/) so coding agents working on these demos
+have current model names, SDK usage, and best practices (which post-date most
+models' training data). See [`.cursor/skills/README.md`](.cursor/skills/README.md).
 
 ## 📖 Resources
 

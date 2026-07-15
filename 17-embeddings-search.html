@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Semantic Search</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .api-key-section {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .api-key-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #apiKeyInput {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        #apiKeyInput:focus {
+            outline: none;
+            border-color: #11998e;
+        }
+
+        #saveApiKey {
+            padding: 10px 20px;
+            background: #11998e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        #saveApiKey:hover {
+            background: #0E7F76;
+        }
+
+        .api-status {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .api-status.success {
+            color: #11998e;
+        }
+
+        .content-section {
+            padding: 30px;
+        }
+
+        .explainer {
+            background: #eafaf3;
+            border: 1px solid #c4ecd9;
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 0.9rem;
+            color: #1a6d54;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        #searchInput {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border-color: #11998e;
+        }
+
+        #searchBtn {
+            padding: 12px 24px;
+            background: #11998e;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        #searchBtn:hover {
+            background: #0E7F76;
+        }
+
+        #searchBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .suggestions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .suggestion-chip {
+            padding: 6px 12px;
+            background: #eafaf3;
+            border: 1px solid #c4ecd9;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            color: #0E7F76;
+            cursor: pointer;
+        }
+
+        .suggestion-chip:hover {
+            background: #d8f4e6;
+        }
+
+        .index-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 12px;
+        }
+
+        .results {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .result-card .emoji {
+            font-size: 1.6rem;
+        }
+
+        .result-card .info {
+            flex: 1;
+        }
+
+        .result-card .title {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .result-card .desc {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .score-wrap {
+            width: 130px;
+            text-align: right;
+        }
+
+        .score-bar {
+            height: 6px;
+            border-radius: 3px;
+            background: #e1e1e1;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #11998e, #38ef7d);
+        }
+
+        .score-label {
+            font-size: 0.75rem;
+            color: #11998e;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .api-key-group {
+                flex-direction: column;
+            }
+
+            #saveApiKey {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔎 Recipe Semantic Search</h1>
+            <p>Find recipes by meaning, not keywords — search like you'd ask a friend</p>
+        </div>
+
+        <div class="api-key-section">
+            <div class="api-key-group">
+                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI API key..." maxlength="100">
+                <button id="saveApiKey">Save Key</button>
+            </div>
+            <div class="api-status" id="apiStatus">Enter your Google AI API key to start searching</div>
+        </div>
+
+        <div class="content-section">
+            <div class="explainer">
+                <strong>How it works:</strong> Gemini reads each recipe and turns it into a long
+                list of numbers that captures what it's <em>about</em> — cozy, spicy, sweet, quick.
+                Your search gets the same treatment, and the recipes whose numbers sit closest to
+                your search win. That's why "something warm for a rainy day" finds soups and stews
+                even though no recipe contains those words.
+            </div>
+
+            <div class="search-row">
+                <input type="text" id="searchInput" placeholder='Try "something warm for a rainy day"...'>
+                <button id="searchBtn">Search</button>
+            </div>
+
+            <div class="suggestions">
+                <span class="suggestion-chip">something warm for a rainy day</span>
+                <span class="suggestion-chip">light and healthy summer lunch</span>
+                <span class="suggestion-chip">impressive dessert for guests</span>
+                <span class="suggestion-chip">spicy food that wakes you up</span>
+                <span class="suggestion-chip">kid-friendly weeknight dinner</span>
+            </div>
+
+            <div class="index-status" id="indexStatus">📚 24 recipes in the cookbook — your first search takes a moment longer while the AI reads them all.</div>
+
+            <div class="results" id="results">
+                <div class="loading">Your best matches, ranked by how closely they fit, will appear here...</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Google GenAI using ESM
+        import { GoogleGenAI } from "https://esm.sh/@google/genai@^2.11.0";
+
+        let apiKey = localStorage.getItem('googleAiApiKey') || '';
+        let ai = null;
+        let recipeEmbeddings = null; // cached after first search
+
+        // A tiny in-memory "cookbook" to search over
+        const RECIPES = [
+            { emoji: '🍜', title: 'Miso Ramen', desc: 'Rich savory broth with noodles, soft-boiled egg, and scallions' },
+            { emoji: '🍲', title: 'Beef Bourguignon', desc: 'Slow-braised beef stew with red wine, mushrooms, and pearl onions' },
+            { emoji: '🥗', title: 'Greek Salad', desc: 'Crisp cucumber, tomato, olives, and feta with oregano vinaigrette' },
+            { emoji: '🍛', title: 'Thai Green Curry', desc: 'Fiery coconut curry with chicken, basil, and bamboo shoots' },
+            { emoji: '🍕', title: 'Margherita Pizza', desc: 'Wood-fired crust with tomato, fresh mozzarella, and basil' },
+            { emoji: '🧆', title: 'Falafel Wraps', desc: 'Crispy chickpea fritters with tahini sauce in warm pita' },
+            { emoji: '🍝', title: 'Cacio e Pepe', desc: 'Roman pasta with pecorino cheese and cracked black pepper' },
+            { emoji: '🥘', title: 'Seafood Paella', desc: 'Saffron rice with shrimp, mussels, and smoked paprika' },
+            { emoji: '🌮', title: 'Fish Tacos', desc: 'Grilled white fish with cabbage slaw and lime crema' },
+            { emoji: '🍔', title: 'Smash Burgers', desc: 'Crispy-edged beef patties with melted cheese on brioche buns' },
+            { emoji: '🥣', title: 'Butternut Squash Soup', desc: 'Velvety roasted squash soup with sage and toasted seeds' },
+            { emoji: '🍗', title: 'Nashville Hot Chicken', desc: 'Fried chicken doused in cayenne oil with pickles' },
+            { emoji: '🥟', title: 'Pork Gyoza', desc: 'Pan-fried dumplings with ginger, garlic, and dipping sauce' },
+            { emoji: '🍚', title: 'Mushroom Risotto', desc: 'Creamy arborio rice with porcini and parmesan' },
+            { emoji: '🌯', title: 'Breakfast Burritos', desc: 'Scrambled eggs, chorizo, and potatoes wrapped in flour tortillas' },
+            { emoji: '🍰', title: 'Basque Cheesecake', desc: 'Burnt-top crustless cheesecake with a custardy center' },
+            { emoji: '🍪', title: 'Brown Butter Chocolate Chip Cookies', desc: 'Chewy cookies with nutty brown butter and sea salt' },
+            { emoji: '🍮', title: 'Crème Brûlée', desc: 'Silky vanilla custard with a crackling caramelized sugar top' },
+            { emoji: '🥞', title: 'Buttermilk Pancakes', desc: 'Fluffy stack with maple syrup and whipped butter' },
+            { emoji: '🍧', title: 'Mango Sticky Rice', desc: 'Sweet coconut rice with ripe mango, served chilled' },
+            { emoji: '🫕', title: 'Cheese Fondue', desc: 'Melted gruyère and white wine for dipping crusty bread' },
+            { emoji: '🍤', title: 'Shrimp Scampi', desc: 'Garlic butter shrimp with white wine over linguine' },
+            { emoji: '🥪', title: 'Grilled Cheese & Tomato Soup', desc: 'Buttery golden sandwich with a cozy bowl of tomato soup' },
+            { emoji: '🍡', title: 'Matcha Mochi Bites', desc: 'Chewy green tea rice cakes dusted with kinako' }
+        ];
+
+        // Initialize elements
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveApiKeyBtn = document.getElementById('saveApiKey');
+        const apiStatus = document.getElementById('apiStatus');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const indexStatus = document.getElementById('indexStatus');
+        const results = document.getElementById('results');
+
+        // Load saved API key
+        if (apiKey) {
+            apiKeyInput.value = apiKey;
+            initializeAI();
+        }
+
+        function initializeAI() {
+            try {
+                ai = new GoogleGenAI({ apiKey: apiKey });
+                apiStatus.textContent = '✅ API key saved and ready!';
+                apiStatus.className = 'api-status success';
+                searchBtn.disabled = false;
+            } catch (error) {
+                apiStatus.textContent = '❌ Invalid API key';
+                apiStatus.className = 'api-status';
+                searchBtn.disabled = true;
+            }
+        }
+
+        saveApiKeyBtn.addEventListener('click', () => {
+            apiKey = apiKeyInput.value.trim();
+            if (apiKey) {
+                localStorage.setItem('googleAiApiKey', apiKey);
+                initializeAI();
+            } else {
+                apiStatus.textContent = 'Please enter a valid API key';
+                apiStatus.className = 'api-status';
+            }
+        });
+
+        document.querySelectorAll('.suggestion-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                searchInput.value = chip.textContent;
+                search();
+            });
+        });
+
+        searchBtn.addEventListener('click', search);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') search();
+        });
+
+        // gemini-embedding-2 uses task prefixes in the text itself
+        // (asymmetric retrieval format) instead of a taskType parameter
+        function formatDocument(recipe) {
+            return `title: ${recipe.title} | text: ${recipe.desc}`;
+        }
+
+        function formatQuery(query) {
+            return `task: search result | query: ${query}`;
+        }
+
+        async function embedRecipes() {
+            indexStatus.textContent = '📖 Reading the cookbook (first search only)...';
+
+            // Wrapping each input in its own Content object returns one
+            // embedding per recipe (a flat list would be aggregated into one)
+            const response = await ai.models.embedContent({
+                model: 'gemini-embedding-2',
+                contents: RECIPES.map(r => ({ parts: [{ text: formatDocument(r) }] }))
+            });
+
+            recipeEmbeddings = response.embeddings.map(e => e.values);
+            indexStatus.textContent = `📚 Cookbook read! Each recipe is now described by ${recipeEmbeddings[0].length.toLocaleString()} numbers — searches are instant from here on.`;
+        }
+
+        function cosineSimilarity(a, b) {
+            let dot = 0, normA = 0, normB = 0;
+            for (let i = 0; i < a.length; i++) {
+                dot += a[i] * b[i];
+                normA += a[i] * a[i];
+                normB += b[i] * b[i];
+            }
+            return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+        }
+
+        async function search() {
+            if (!ai) {
+                alert('Please enter your Google AI API key first');
+                return;
+            }
+
+            const query = searchInput.value.trim();
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            searchBtn.disabled = true;
+            results.innerHTML = '<div class="loading">🔎 Searching by meaning...</div>';
+
+            try {
+                if (!recipeEmbeddings) {
+                    await embedRecipes();
+                }
+
+                const queryResponse = await ai.models.embedContent({
+                    model: 'gemini-embedding-2',
+                    contents: [{ parts: [{ text: formatQuery(query) }] }]
+                });
+                const queryEmbedding = queryResponse.embeddings[0].values;
+
+                // Rank all recipes by cosine similarity to the query
+                const ranked = RECIPES
+                    .map((recipe, i) => ({ recipe, score: cosineSimilarity(queryEmbedding, recipeEmbeddings[i]) }))
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 6);
+
+                const minScore = Math.min(...ranked.map(r => r.score));
+                const maxScore = Math.max(...ranked.map(r => r.score));
+
+                results.innerHTML = ranked.map(({ recipe, score }) => {
+                    // Normalize bar widths within the result set for readability
+                    const barWidth = maxScore === minScore ? 100 : 20 + 80 * (score - minScore) / (maxScore - minScore);
+                    return `
+                        <div class="result-card">
+                            <div class="emoji">${recipe.emoji}</div>
+                            <div class="info">
+                                <div class="title">${recipe.title}</div>
+                                <div class="desc">${recipe.desc}</div>
+                            </div>
+                            <div class="score-wrap">
+                                <div class="score-label">${score.toFixed(3)}</div>
+                                <div class="score-bar"><div class="score-bar-fill" style="width: ${barWidth}%"></div></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error('Error searching:', error);
+                results.innerHTML = '<div class="loading">❌ Error running search. Please check your API key and try again.</div>';
+            }
+
+            searchBtn.disabled = false;
+        }
+
+        // Initialize
+        searchBtn.disabled = !apiKey;
+    </script>
+</body>
+</html>

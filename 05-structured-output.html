@@ -251,7 +251,7 @@
     <div class="container">
         <div class="header">
             <h1>📊 Restaurant Menu Database</h1>
-            <p>Convert menu descriptions into structured JSON data</p>
+            <p>Turn messy menu text into tidy, computer-readable data (JSON)</p>
         </div>
         
         <div class="api-key-section">
@@ -353,7 +353,7 @@ Spice level: Mild. Serving size: 300g.</textarea>
 
     <script type="module">
         // Import Google GenAI using ESM
-        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@latest";
+        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@^2.11.0";
 
         let apiKey = localStorage.getItem('googleAiApiKey') || '';
         let ai = null;
@@ -427,11 +427,11 @@ Spice level: Mild. Serving size: 300g.</textarea>
                 const parsedSchema = JSON.parse(schema);
 
                 const response = await ai.models.generateContent({
-                    model: "gemini-2.5-flash",
+                    model: "gemini-3.5-flash",
                     contents: [{
                         text: `Convert this menu description into JSON format following the provided schema:\n\nMenu description: ${menuText}\n\nSchema: ${schema}\n\nReturn only valid JSON that matches the schema.`
                     }],
-                    generationConfig: {
+                    config: {
                         responseMimeType: "application/json",
                         responseSchema: convertToGeminiSchema(parsedSchema)
                     },

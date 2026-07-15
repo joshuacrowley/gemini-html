@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sous-Chef Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4A90D9 0%, #7B68EE 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .api-key-section {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .api-key-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #apiKeyInput {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        #apiKeyInput:focus {
+            outline: none;
+            border-color: #4A90D9;
+        }
+
+        #saveApiKey {
+            padding: 10px 20px;
+            background: #4A90D9;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        #saveApiKey:hover {
+            background: #3A7BC0;
+        }
+
+        .api-status {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .api-status.success {
+            color: #4A90D9;
+        }
+
+        .content-section {
+            padding: 30px;
+        }
+
+        .chat-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chat-toolbar .hint {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        #resetBtn {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        #resetBtn:hover {
+            background: #e4e4e4;
+        }
+
+        .chat-messages {
+            height: 420px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            font-size: 0.95rem;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: #4A90D9;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+            background: white;
+            border: 1px solid #e1e1e1;
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.system {
+            align-self: center;
+            background: #fff3cd;
+            color: #856404;
+            font-size: 0.85rem;
+        }
+
+        .stream-stats {
+            align-self: flex-start;
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: -8px;
+            padding-left: 6px;
+        }
+
+        .cursor-blink::after {
+            content: '▍';
+            animation: blink 1s step-start infinite;
+            color: #4A90D9;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        #chatInput {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 1rem;
+            resize: none;
+            font-family: inherit;
+        }
+
+        #chatInput:focus {
+            outline: none;
+            border-color: #4A90D9;
+        }
+
+        #sendBtn {
+            padding: 12px 24px;
+            background: #4A90D9;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        #sendBtn:hover {
+            background: #3A7BC0;
+        }
+
+        #sendBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .suggestions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .suggestion-chip {
+            padding: 6px 12px;
+            background: #eef4fc;
+            border: 1px solid #cfe0f5;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            color: #3A7BC0;
+            cursor: pointer;
+        }
+
+        .suggestion-chip:hover {
+            background: #dcebfa;
+        }
+
+        @media (max-width: 768px) {
+            .api-key-group {
+                flex-direction: column;
+            }
+
+            #saveApiKey {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👨‍🍳 Sous-Chef Chat</h1>
+            <p>A live back-and-forth conversation with your AI kitchen assistant</p>
+        </div>
+
+        <div class="api-key-section">
+            <div class="api-key-group">
+                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI API key..." maxlength="100">
+                <button id="saveApiKey">Save Key</button>
+            </div>
+            <div class="api-status" id="apiStatus">Enter your Google AI API key to start chatting</div>
+        </div>
+
+        <div class="content-section">
+            <div class="chat-toolbar">
+                <span class="hint">💡 The chat remembers context — try follow-ups like "make it vegetarian"</span>
+                <button id="resetBtn">🔄 New Conversation</button>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message system">Ask your sous-chef anything! Replies appear word by word, as they're written.</div>
+            </div>
+
+            <div class="input-row">
+                <textarea id="chatInput" rows="1" placeholder="e.g. Suggest a quick weeknight pasta dish..."></textarea>
+                <button id="sendBtn">Send</button>
+            </div>
+
+            <div class="suggestions">
+                <span class="suggestion-chip">Suggest a quick weeknight pasta dish</span>
+                <span class="suggestion-chip">Now make it vegetarian</span>
+                <span class="suggestion-chip">Halve the servings</span>
+                <span class="suggestion-chip">What wine pairs with it?</span>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Google GenAI using ESM
+        import { GoogleGenAI } from "https://esm.sh/@google/genai@^2.11.0";
+
+        let apiKey = localStorage.getItem('googleAiApiKey') || '';
+        let ai = null;
+        let chat = null;
+
+        // Initialize elements
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveApiKeyBtn = document.getElementById('saveApiKey');
+        const apiStatus = document.getElementById('apiStatus');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // Load saved API key
+        if (apiKey) {
+            apiKeyInput.value = apiKey;
+            initializeAI();
+        }
+
+        function initializeAI() {
+            try {
+                ai = new GoogleGenAI({ apiKey: apiKey });
+                startNewChat();
+                apiStatus.textContent = '✅ API key saved and ready!';
+                apiStatus.className = 'api-status success';
+                sendBtn.disabled = false;
+            } catch (error) {
+                apiStatus.textContent = '❌ Invalid API key';
+                apiStatus.className = 'api-status';
+                sendBtn.disabled = true;
+            }
+        }
+
+        function startNewChat() {
+            // ai.chats.create() keeps the conversation history for you —
+            // each sendMessageStream call automatically includes prior turns
+            chat = ai.chats.create({
+                model: 'gemini-3.5-flash',
+                config: {
+                    systemInstruction: 'You are a friendly, concise sous-chef. Give practical cooking advice and recipes. Keep answers short and conversational unless asked for a full recipe.'
+                }
+            });
+        }
+
+        saveApiKeyBtn.addEventListener('click', () => {
+            apiKey = apiKeyInput.value.trim();
+            if (apiKey) {
+                localStorage.setItem('googleAiApiKey', apiKey);
+                initializeAI();
+            } else {
+                apiStatus.textContent = 'Please enter a valid API key';
+                apiStatus.className = 'api-status';
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            if (!ai) return;
+            startNewChat();
+            chatMessages.innerHTML = '<div class="message system">New conversation started — previous context has been cleared.</div>';
+        });
+
+        // Suggestion chips fill the input
+        document.querySelectorAll('.suggestion-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                chatInput.value = chip.textContent;
+                chatInput.focus();
+            });
+        });
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        function addMessage(type, text) {
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.textContent = text;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return div;
+        }
+
+        async function sendMessage() {
+            if (!ai || !chat) {
+                alert('Please enter your Google AI API key first');
+                return;
+            }
+
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            chatInput.value = '';
+            addMessage('user', message);
+
+            sendBtn.disabled = true;
+            const assistantDiv = addMessage('assistant', '');
+            assistantDiv.classList.add('cursor-blink');
+
+            const startTime = performance.now();
+            let firstTokenTime = null;
+
+            try {
+                // Streaming: chunks arrive as they are generated instead of
+                // waiting for the whole response
+                const stream = await chat.sendMessageStream({ message });
+
+                for await (const chunk of stream) {
+                    if (chunk.text) {
+                        if (firstTokenTime === null) {
+                            firstTokenTime = performance.now() - startTime;
+                        }
+                        assistantDiv.textContent += chunk.text;
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+                }
+
+                assistantDiv.classList.remove('cursor-blink');
+
+                // Show streaming stats under the message
+                const totalTime = performance.now() - startTime;
+                const stats = document.createElement('div');
+                stats.className = 'stream-stats';
+                stats.textContent = `⚡ Started replying in ${((firstTokenTime ?? totalTime) / 1000).toFixed(1)}s · finished in ${(totalTime / 1000).toFixed(1)}s`;
+                chatMessages.appendChild(stats);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            } catch (error) {
+                console.error('Error streaming response:', error);
+                assistantDiv.classList.remove('cursor-blink');
+                assistantDiv.textContent = '❌ Error getting response. Please check your API key and try again.';
+            }
+
+            sendBtn.disabled = false;
+            chatInput.focus();
+        }
+
+        // Initialize
+        sendBtn.disabled = !apiKey;
+    </script>
+</body>
+</html>

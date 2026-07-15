@@ -381,7 +381,7 @@
 
     <script type="module">
         // Import Google GenAI using ESM
-        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@latest";
+        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@^2.11.0";
 
         let apiKey = localStorage.getItem('googleAiApiKey') || '';
         let ai = null;
@@ -477,9 +477,13 @@ Return a JSON object with:
 Focus on extracting accurate baking times, temperatures, and ingredient differences.`;
 
             const response = await ai.models.generateContent({
-                model: "gemini-2.5-flash",
+                model: "gemini-3.5-flash",
                 contents: [{ text: prompt }],
-                generationConfig: {
+                config: {
+                    // The urlContext tool lets Gemini fetch and read the
+                    // linked pages directly (Gemini 3 also supports combining
+                    // it with structured JSON output)
+                    tools: [{ urlContext: {} }],
                     responseMimeType: "application/json",
                     responseSchema: {
                         type: Type.OBJECT,

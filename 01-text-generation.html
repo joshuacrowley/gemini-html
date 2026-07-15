@@ -221,8 +221,14 @@
         <div class="content-section">
             <div class="controls">
                 <div class="control-group">
-                    <label for="temperatureSlider">Temperature (Creativity): <span id="tempValue">1.0</span></label>
-                    <input type="range" id="temperatureSlider" min="0" max="2" step="0.1" value="1.0">
+                    <label for="creativitySelect">Creativity Level</label>
+                    <select id="creativitySelect">
+                        <option value="balanced" selected>Balanced</option>
+                        <option value="classic">Classic (Stick to tradition)</option>
+                        <option value="adventurous">Adventurous (Unexpected twists)</option>
+                        <option value="wild">Wildly Imaginative (Anything goes)</option>
+                    </select>
+                    <small style="color: #666; font-size: 0.8rem;">Your choice shapes the instructions the AI is given</small>
                 </div>
                 
                 <div class="control-group">
@@ -255,7 +261,7 @@
 
     <script type="module">
         // Import Google GenAI using ESM
-        import { GoogleGenAI } from "https://esm.sh/@google/genai@latest";
+        import { GoogleGenAI } from "https://esm.sh/@google/genai@^2.11.0";
 
         let apiKey = localStorage.getItem('googleAiApiKey') || '';
         let ai = null;
@@ -264,8 +270,7 @@
         const apiKeyInput = document.getElementById('apiKeyInput');
         const saveApiKeyBtn = document.getElementById('saveApiKey');
         const apiStatus = document.getElementById('apiStatus');
-        const temperatureSlider = document.getElementById('temperatureSlider');
-        const tempValue = document.getElementById('tempValue');
+        const creativitySelect = document.getElementById('creativitySelect');
         const systemInstruction = document.getElementById('systemInstruction');
         const promptInput = document.getElementById('promptInput');
         const generateBtn = document.getElementById('generateBtn');
@@ -301,10 +306,15 @@
             }
         });
 
-        // Temperature slider
-        temperatureSlider.addEventListener('input', (e) => {
-            tempValue.textContent = e.target.value;
-        });
+        // Creativity steering — Gemini 3.x models are optimized for default
+        // sampling settings, so creativity is guided via instructions instead
+        // of the temperature parameter.
+        const creativityInstructions = {
+            balanced: 'Balance creativity with practicality in your recipes.',
+            classic: 'Stay close to classic, time-tested recipes and techniques.',
+            adventurous: 'Add unexpected twists and inventive flavor combinations.',
+            wild: 'Be wildly imaginative — invent surreal, playful recipes that no one has ever seen before.'
+        };
 
         // Generate recipe
         generateBtn.addEventListener('click', async () => {
@@ -324,12 +334,11 @@
 
             try {
                 const response = await ai.models.generateContent({
-                    model: "gemini-2.5-flash",
-                    systemInstruction: `You are a ${systemInstruction.value}. Create detailed, engaging recipes that are both informative and entertaining.`,
+                    model: "gemini-3.5-flash",
                     contents: [{ text: prompt }],
-                    generationConfig: {
-                        temperature: parseFloat(temperatureSlider.value),
-                        maxOutputTokens: 2048,
+                    config: {
+                        systemInstruction: `You are a ${systemInstruction.value}. Create detailed, engaging recipes that are both informative and entertaining. ${creativityInstructions[creativitySelect.value]}`,
+                        maxOutputTokens: 4096,
                     },
                 });
                 outputContent.textContent = response.text;

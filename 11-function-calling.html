@@ -397,12 +397,56 @@
 
     <script type="module">
         // Import Google GenAI using ESM
-        import { GoogleGenAI } from "https://esm.sh/@google/genai@latest";
+        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@^2.11.0";
 
         let apiKey = localStorage.getItem('googleAiApiKey') || '';
         let ai = null;
         let timers = [];
         let timerIdCounter = 1;
+
+        // Function declarations for the Gemini function calling API
+        const timerFunctionDeclarations = [
+            {
+                name: 'setTimer',
+                description: 'Set a new kitchen timer with a name and duration in minutes.',
+                parameters: {
+                    type: Type.OBJECT,
+                    properties: {
+                        name: { type: Type.STRING, description: 'What the timer is for, e.g. "pasta"' },
+                        minutes: { type: Type.NUMBER, description: 'Timer duration in minutes' }
+                    },
+                    required: ['name', 'minutes']
+                }
+            },
+            {
+                name: 'listTimers',
+                description: 'List all currently active kitchen timers.',
+                parameters: { type: Type.OBJECT, properties: {} }
+            },
+            {
+                name: 'addTime',
+                description: 'Add extra minutes to an existing timer.',
+                parameters: {
+                    type: Type.OBJECT,
+                    properties: {
+                        timerName: { type: Type.STRING, description: 'Name of the existing timer' },
+                        additionalMinutes: { type: Type.NUMBER, description: 'Minutes to add' }
+                    },
+                    required: ['timerName', 'additionalMinutes']
+                }
+            },
+            {
+                name: 'removeTimer',
+                description: 'Remove/cancel an existing timer by name.',
+                parameters: {
+                    type: Type.OBJECT,
+                    properties: {
+                        timerName: { type: Type.STRING, description: 'Name of the timer to remove' }
+                    },
+                    required: ['timerName']
+                }
+            }
+        ];
 
         // Initialize elements
         const apiKeyInput = document.getElementById('apiKeyInput');
@@ -504,34 +548,51 @@
 
         async function processCommand(command) {
             try {
-                // Simulate function calling with AI
+                const config = {
+                    systemInstruction: 'You are a kitchen timer assistant. Use the provided timer functions to fulfill user requests.',
+                    tools: [{ functionDeclarations: timerFunctionDeclarations }]
+                };
+                const contents = [{ role: 'user', parts: [{ text: command }] }];
+
+                // Ask the model which timer function to call
                 const response = await ai.models.generateContent({
-                    model: "gemini-2.5-flash",
-                    contents: [{
-                        text: `You are a kitchen timer assistant. Analyze this command and determine what timer function to call: "${command}". 
-                        
-                        Available functions:
-                        - setTimer(name, minutes): Set a new timer
-                        - listTimers(): Show all active timers  
-                        - addTime(timerName, additionalMinutes): Add time to existing timer
-                        - removeTimer(timerName): Remove a timer
-                        
-                        Respond with the function name and parameters, then a friendly message.`
-                    }],
+                    model: "gemini-3.5-flash",
+                    contents: contents,
+                    config: config
                 });
 
-                // Parse the AI response and simulate function execution
-                const aiResponse = response.text;
-                const functionCall = extractFunctionCall(command);
-                
-                if (functionCall) {
-                    const result = executeFunction(functionCall);
-                    addMessage('assistant', result.message, {
+                if (response.functionCalls && response.functionCalls.length > 0) {
+                    const functionCall = response.functionCalls[0];
+
+                    // Execute the requested function locally
+                    const result = executeFunction(functionCall.name, functionCall.args);
+
+                    // Send the function result back (matching id and name) so the
+                    // model can produce a natural-language confirmation
+                    contents.push(response.candidates[0].content);
+                    contents.push({
+                        role: 'user',
+                        parts: [{
+                            functionResponse: {
+                                name: functionCall.name,
+                                response: { result: result.message },
+                                id: functionCall.id
+                            }
+                        }]
+                    });
+
+                    const finalResponse = await ai.models.generateContent({
+                        model: "gemini-3.5-flash",
+                        contents: contents,
+                        config: config
+                    });
+
+                    addMessage('assistant', finalResponse.text || result.message, {
                         name: functionCall.name,
-                        params: functionCall.params
+                        params: functionCall.args
                     });
                 } else {
-                    addMessage('assistant', aiResponse);
+                    addMessage('assistant', response.text);
                 }
 
             } catch (error) {
@@ -540,54 +601,16 @@
             }
         }
 
-        function extractFunctionCall(command) {
-            const lowerCommand = command.toLowerCase();
-            
-            // Set timer pattern
-            const setTimerMatch = lowerCommand.match(/set.*timer.*?(\d+).*?minute.*?for.*?(.+?)(?:\.|$)/);
-            if (setTimerMatch) {
-                return {
-                    name: 'setTimer',
-                    params: {
-                        name: setTimerMatch[2].trim(),
-                        minutes: parseInt(setTimerMatch[1])
-                    }
-                };
-            }
-
-            // List timers pattern
-            if (lowerCommand.includes('what timer') || lowerCommand.includes('show timer') || lowerCommand.includes('list timer')) {
-                return {
-                    name: 'listTimers',
-                    params: {}
-                };
-            }
-
-            // Add time pattern
-            const addTimeMatch = lowerCommand.match(/add.*?(\d+).*?minute.*?to.*?(.+?)(?:\.|$)/);
-            if (addTimeMatch) {
-                return {
-                    name: 'addTime',
-                    params: {
-                        timerName: addTimeMatch[2].trim(),
-                        additionalMinutes: parseInt(addTimeMatch[1])
-                    }
-                };
-            }
-
-            return null;
-        }
-
-        function executeFunction(functionCall) {
-            switch (functionCall.name) {
+        function executeFunction(name, args) {
+            switch (name) {
                 case 'setTimer':
-                    return setTimer(functionCall.params.name, functionCall.params.minutes);
+                    return setTimer(args.name, args.minutes);
                 case 'listTimers':
                     return listTimers();
                 case 'addTime':
-                    return addTime(functionCall.params.timerName, functionCall.params.additionalMinutes);
+                    return addTime(args.timerName, args.additionalMinutes);
                 case 'removeTimer':
-                    return removeTimer(functionCall.params.timerName);
+                    return removeTimer(args.timerName);
                 default:
                     return { message: "I don't recognize that function." };
             }

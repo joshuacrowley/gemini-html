@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dish Refinement Studio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #F2994A 0%, #F2C94C 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .api-key-section {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .api-key-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #apiKeyInput {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        #apiKeyInput:focus {
+            outline: none;
+            border-color: #F2994A;
+        }
+
+        #saveApiKey {
+            padding: 10px 20px;
+            background: #F2994A;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        #saveApiKey:hover {
+            background: #E0883A;
+        }
+
+        .api-status {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .api-status.success {
+            color: #F2994A;
+        }
+
+        .paid-notice {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: #856404;
+            background: #fff3cd;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .content-section {
+            padding: 30px;
+        }
+
+        .canvas-area {
+            background: #f8f9fa;
+            border-radius: 12px;
+            min-height: 340px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .canvas-area img {
+            max-width: 100%;
+            max-height: 460px;
+            border-radius: 12px;
+        }
+
+        .placeholder {
+            color: #999;
+            text-align: center;
+            padding: 40px;
+            line-height: 1.6;
+        }
+
+        .history-strip {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            padding-bottom: 6px;
+        }
+
+        .history-item {
+            flex-shrink: 0;
+            width: 96px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .history-item img {
+            width: 96px;
+            height: 72px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 3px solid transparent;
+        }
+
+        .history-item.active img {
+            border-color: #F2994A;
+        }
+
+        .history-item .turn-label {
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        #promptInput {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        #promptInput:focus {
+            outline: none;
+            border-color: #F2994A;
+        }
+
+        #generateBtn {
+            padding: 12px 24px;
+            background: #F2994A;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        #generateBtn:hover {
+            background: #E0883A;
+        }
+
+        #generateBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .hint {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        #resetBtn {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .suggestions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .suggestion-chip {
+            padding: 6px 12px;
+            background: #fdf3e7;
+            border: 1px solid #f5ddc0;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            color: #C07830;
+            cursor: pointer;
+        }
+
+        .suggestion-chip:hover {
+            background: #fae7d0;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .api-key-group {
+                flex-direction: column;
+            }
+
+            #saveApiKey {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Dish Refinement Studio</h1>
+            <p>Generate a dish, then refine it turn by turn with Nano Banana 2</p>
+        </div>
+
+        <div class="api-key-section">
+            <div class="api-key-group">
+                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI API key..." maxlength="100">
+                <button id="saveApiKey">Save Key</button>
+            </div>
+            <div class="api-status" id="apiStatus">Enter your Google AI API key to start creating</div>
+            <div class="paid-notice">⚠️ Creating pictures isn't part of Google's free tier, so this demo needs a paid API key.</div>
+        </div>
+
+        <div class="content-section">
+            <div class="canvas-area" id="canvasArea">
+                <div class="placeholder">
+                    🍲 Describe a dish and a picture of it will appear here.<br>
+                    Then keep tweaking it — "add steam", "moodier lighting" — each edit builds on the last picture.
+                </div>
+            </div>
+
+            <div class="history-strip" id="historyStrip"></div>
+
+            <div class="input-row">
+                <input type="text" id="promptInput" placeholder='e.g. "A rustic bowl of ramen with soft-boiled egg, overhead shot"'>
+                <button id="generateBtn">Generate</button>
+            </div>
+
+            <div class="suggestions">
+                <span class="suggestion-chip">A rustic bowl of ramen with a soft-boiled egg, overhead shot</span>
+                <span class="suggestion-chip">Add steam rising from the broth</span>
+                <span class="suggestion-chip">Make the lighting moodier and more dramatic</span>
+                <span class="suggestion-chip">Swap the bowl for a bright turquoise one</span>
+            </div>
+
+            <div class="toolbar">
+                <span class="hint">💡 After the first image, prompts act as edits to the current dish</span>
+                <button id="resetBtn">🔄 Start Over</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Google GenAI using ESM
+        import { GoogleGenAI } from "https://esm.sh/@google/genai@^2.11.0";
+
+        let apiKey = localStorage.getItem('googleAiApiKey') || '';
+        let ai = null;
+        let chat = null;
+        let history = []; // { prompt, dataUrl }
+
+        // Initialize elements
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveApiKeyBtn = document.getElementById('saveApiKey');
+        const apiStatus = document.getElementById('apiStatus');
+        const canvasArea = document.getElementById('canvasArea');
+        const historyStrip = document.getElementById('historyStrip');
+        const promptInput = document.getElementById('promptInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // Load saved API key
+        if (apiKey) {
+            apiKeyInput.value = apiKey;
+            initializeAI();
+        }
+
+        function initializeAI() {
+            try {
+                ai = new GoogleGenAI({ apiKey: apiKey });
+                startNewSession();
+                apiStatus.textContent = '✅ API key saved and ready!';
+                apiStatus.className = 'api-status success';
+                generateBtn.disabled = false;
+            } catch (error) {
+                apiStatus.textContent = '❌ Invalid API key';
+                apiStatus.className = 'api-status';
+                generateBtn.disabled = true;
+            }
+        }
+
+        function startNewSession() {
+            // A chat session with an image model enables conversational
+            // editing: each turn sees the previously generated images, so
+            // "add steam" edits the current dish instead of starting over
+            chat = ai.chats.create({
+                model: 'gemini-3.1-flash-image' // Nano Banana 2
+            });
+        }
+
+        saveApiKeyBtn.addEventListener('click', () => {
+            apiKey = apiKeyInput.value.trim();
+            if (apiKey) {
+                localStorage.setItem('googleAiApiKey', apiKey);
+                initializeAI();
+            } else {
+                apiStatus.textContent = 'Please enter a valid API key';
+                apiStatus.className = 'api-status';
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            if (!ai) return;
+            startNewSession();
+            history = [];
+            historyStrip.innerHTML = '';
+            canvasArea.innerHTML = '<div class="placeholder">🍲 Fresh plate! Describe a new dish to generate it.</div>';
+        });
+
+        document.querySelectorAll('.suggestion-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                promptInput.value = chip.textContent;
+                promptInput.focus();
+            });
+        });
+
+        generateBtn.addEventListener('click', generate);
+        promptInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') generate();
+        });
+
+        async function generate() {
+            if (!ai || !chat) {
+                alert('Please enter your Google AI API key first');
+                return;
+            }
+
+            const prompt = promptInput.value.trim();
+            if (!prompt) {
+                alert('Please describe the dish or the edit you want');
+                return;
+            }
+
+            generateBtn.disabled = true;
+            const isEdit = history.length > 0;
+            canvasArea.innerHTML = `<div class="loading">${isEdit ? '✨ Refining your dish...' : '🎨 Plating your dish...'}</div>`;
+
+            try {
+                const response = await chat.sendMessage({ message: prompt });
+
+                // Find the generated image among the response parts
+                let imageData = null;
+                let mimeType = 'image/png';
+                for (const part of response.candidates?.[0]?.content?.parts || []) {
+                    if (part.inlineData) {
+                        imageData = part.inlineData.data;
+                        mimeType = part.inlineData.mimeType || mimeType;
+                    }
+                }
+
+                if (!imageData) {
+                    throw new Error(response.text || 'The AI replied with words instead of a picture — try rephrasing your request.');
+                }
+
+                const dataUrl = `data:${mimeType};base64,${imageData}`;
+                history.push({ prompt, dataUrl });
+                promptInput.value = '';
+                promptInput.placeholder = 'Describe an edit, e.g. "add a garnish of fresh herbs"';
+                renderHistory(history.length - 1);
+
+            } catch (error) {
+                console.error('Error generating image:', error);
+                canvasArea.innerHTML = `<div class="placeholder">❌ ${escapeHtml(error.message || 'Error generating image. Note: this demo requires a paid API key.')}</div>`;
+            }
+
+            generateBtn.disabled = false;
+            promptInput.focus();
+        }
+
+        function renderHistory(activeIndex) {
+            canvasArea.innerHTML = `<img src="${history[activeIndex].dataUrl}" alt="Generated dish">`;
+
+            historyStrip.innerHTML = history.map((item, i) => `
+                <div class="history-item ${i === activeIndex ? 'active' : ''}" data-index="${i}">
+                    <img src="${item.dataUrl}" alt="Turn ${i + 1}">
+                    <div class="turn-label" title="${escapeHtml(item.prompt)}">${i === 0 ? '🎨' : '✏️'} ${escapeHtml(item.prompt)}</div>
+                </div>
+            `).join('');
+
+            historyStrip.querySelectorAll('.history-item').forEach(el => {
+                el.addEventListener('click', () => renderHistory(parseInt(el.dataset.index)));
+            });
+
+            historyStrip.scrollLeft = historyStrip.scrollWidth;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize
+        generateBtn.disabled = !apiKey;
+    </script>
+</body>
+</html>

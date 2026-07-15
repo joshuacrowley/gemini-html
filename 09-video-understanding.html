@@ -456,7 +456,7 @@
 
     <script type="module">
         // Import Google GenAI using ESM
-        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@latest";
+        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@^2.11.0";
 
         let apiKey = localStorage.getItem('googleAiApiKey') || '';
         let ai = null;
@@ -636,14 +636,14 @@
                 : `Analyze this cooking video and extract step-by-step cooking instructions. Focus on the cooking techniques and ingredients used.`;
 
             const response = await ai.models.generateContent({
-                model: "gemini-2.5-flash",
+                model: "gemini-3.5-flash",
                 contents: [{
                     parts: [
                         { fileData: { fileUri: youtubeVideoUrl } },
                         { text: prompt }
                     ]
                 }],
-                generationConfig: generateTimestamps.checked ? {
+                config: generateTimestamps.checked ? {
                     responseMimeType: "application/json",
                     responseSchema: {
                         type: Type.OBJECT,
@@ -709,8 +709,8 @@
         async function analyzeUploadedVideo() {
             // For uploaded videos, we'd need to use the Files API
             // This is a more complex implementation that requires file upload
-            stepsTimeline.innerHTML = '<div class="loading">📁 File upload video analysis requires Files API integration</div>';
-            chapterMarkers.innerHTML = '<div class="loading">Please use a YouTube URL for now</div>';
+            stepsTimeline.innerHTML = '<div class="loading">📁 Uploading video files isn\'t supported in this demo yet</div>';
+            chapterMarkers.innerHTML = '<div class="loading">Please paste a YouTube link instead</div>';
         }
 
         function displaySteps(steps) {
